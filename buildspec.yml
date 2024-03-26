@@ -13,8 +13,12 @@ phases:
       - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
   pre_build:
     commands:
-      - composer install
+      - composer update
       - npm install
+      - composer require --dev phpunit/phpunit
+  build:
+    commands:
+      - php artisan test
 artifacts:
   files:
     - "**/*"
