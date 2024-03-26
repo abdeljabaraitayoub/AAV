@@ -51,4 +51,21 @@ class CarController extends Controller
         $car->delete();
         return response()->json(['message' => 'Car deleted successfully'], 200);
     }
+    public function estimate(Request $request)
+    {
+
+        $similarCars = Car::where('marque', 'LIKE', '%' . $request->marque . '%')
+            ->where('modele', 'LIKE', '%' . $request->modele . '%')
+            ->where('annee', 'LIKE', '%' . $request->annee . '%')
+            ->get();
+
+        if ($similarCars->isEmpty()) {
+            return response()->json(['message' => 'No similar cars found'], 404);
+        }
+
+        $totalPrice = $similarCars->sum('prix');
+        $estimatedPrice = $totalPrice / $similarCars->count();
+
+        return response()->json(['estimatedPrice' => $estimatedPrice, 'totalPrice' => $totalPrice, 'count' => $similarCars->count()]);
+    }
 }

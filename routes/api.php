@@ -28,3 +28,4 @@ Route::post('refresh', 'App\Http\Controllers\AuthController@refresh');
 Route::post('me', 'App\Http\Controllers\AuthController@me');
 
 Route::apiResource('cars', 'App\Http\Controllers\CarController');
+Route::post('estimate', 'App\Http\Controllers\CarController@estimate');
