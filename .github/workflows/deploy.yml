@@ -1,0 +1,51 @@
+name: Laravel CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+      - name: Build and Start Docker Containers
+        run: |
+          ./vendor/bin/sail up -d
+
+      # - name: Install Dependencies
+      #   run: |
+      #     docker exec <app-container-name> composer install
+
+      # - name: Run Tests
+      #   run: |
+      #     docker exec <app-container-name> ./vendor/bin/phpunit
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /path/to/your/application
+            git pull origin main
+            ./vendor/bin/sail up -d
+            docker exec <app-container-name> composer install
+            docker exec <app-container-name> php artisan migrate
+          EOF
